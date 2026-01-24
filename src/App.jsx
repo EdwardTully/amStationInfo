@@ -4,6 +4,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { LocationInput } from './components/LocationInput';
 import { parseStationData } from './utils/stationParser';
+import { parseCanadianStationData } from './utils/canadianParser';
 import './App.css';
 
 // Fix for default marker icons in Leaflet
@@ -45,13 +46,27 @@ function App() {
     try {
       setLoading(true);
       console.log('Fetching station data...');
-      const response = await fetch('/amRadioSta.txt');
-      console.log('Response status:', response.status);
-      const text = await response.text();
-      console.log('Data length:', text.length);
-      const parsedStations = parseStationData(text);
-      console.log('Parsed stations:', parsedStations.length);
-      setStations(parsedStations);
+      
+      // Load US stations
+      const usResponse = await fetch('/amRadioSta.txt');
+      console.log('US Response status:', usResponse.status);
+      const usText = await usResponse.text();
+      console.log('US Data length:', usText.length);
+      const usStations = parseStationData(usText);
+      console.log('US Parsed stations:', usStations.length);
+      
+      // Load Canadian stations
+      const caResponse = await fetch('/canadianStations.csv');
+      console.log('CA Response status:', caResponse.status);
+      const caText = await caResponse.text();
+      const caStations = parseCanadianStationData(caText);
+      console.log('Canadian Parsed stations:', caStations.length);
+      
+      // Combine both datasets
+      const allStations = [...usStations, ...caStations];
+      console.log('Total stations:', allStations.length);
+      
+      setStations(allStations);
       setError(null);
     } catch (err) {
       console.error('Error loading station data:', err);
