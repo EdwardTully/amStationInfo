@@ -31,7 +31,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [mapCenter, setMapCenter] = useState([39.8283, -98.5795]); // Center of US [lat, lng]
-  const [mapZoom, setMapZoom] = useState(4);
+  const [mapZoom, setMapZoom] = useState(4.5);
   const [searchQuery, setSearchQuery] = useState('');
   const [highlightedStation, setHighlightedStation] = useState(null);
 
