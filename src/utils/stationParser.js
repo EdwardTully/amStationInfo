@@ -50,6 +50,11 @@ export function parseStationData(fileContent) {
       const lonMin = parseInt(lonParts[1]);
       const lonSec = parseFloat(lonParts[2]);
       
+      // Find operator - it's after the longitude coordinates
+      const operatorStart = wIndex + 20;
+      const operatorStr = line.substring(operatorStart, operatorStart + 80).trim();
+      const operator = operatorStr.substring(0, operatorStr.search(/\s{2,}|\d{2,}/)).trim() || operatorStr.substring(0, 60).trim();
+      
       // Find power (look for "kW")
       const kwIndex = line.indexOf('kW', usIndex);
       if (kwIndex > 0) {
@@ -76,6 +81,7 @@ export function parseStationData(fileContent) {
         state,
         lat,
         lon,
+        operator,
         id: `${callSign}-${frequency}`,
       };
 

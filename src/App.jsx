@@ -303,6 +303,11 @@ function App() {
                     <p style={{ margin: '4px 0', fontSize: '14px' }}>
                       <strong>Location:</strong> {station.city}, {station.state}
                     </p>
+                    {station.operator && (
+                      <p style={{ margin: '4px 0', fontSize: '14px' }}>
+                        <strong>Operator:</strong> {station.operator}
+                      </p>
+                    )}
                     {distance !== null && (
                       <p style={{ margin: '4px 0', fontSize: '14px', color: '#0066cc' }}>
                         <strong>Distance:</strong> {distance.toFixed(1)} miles
