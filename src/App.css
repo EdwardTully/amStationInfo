@@ -58,6 +58,24 @@ body {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
+  align-items: center;
+}
+
+.search-type-select {
+  padding: 10px 12px;
+  font-size: 16px;
+  border: 2px solid white;
+  border-radius: 6px;
+  background: white;
+  color: #333;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.search-type-select:focus {
+  border-color: #ffd700;
+  box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.2);
 }
 
 .search-input {

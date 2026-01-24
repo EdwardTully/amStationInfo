@@ -33,7 +33,8 @@ function App() {
   const [mapCenter, setMapCenter] = useState([39.8283, -98.5795]); // Center of US [lat, lng]
   const [mapZoom, setMapZoom] = useState(4.5);
   const [searchQuery, setSearchQuery] = useState('');
-  const [highlightedStation, setHighlightedStation] = useState(null);
+  const [searchType, setSearchType] = useState('callsign'); // 'callsign' or 'frequency'
+  const [highlightedStations, setHighlightedStations] = useState([]);
 
   // Load station data on mount
   useEffect(() => {
@@ -74,26 +75,56 @@ function App() {
   const handleStationSearch = (e) => {
     e.preventDefault();
     if (!searchQuery.trim()) {
-      setHighlightedStation(null);
+      setHighlightedStations([]);
       return;
     }
 
-    const found = stations.find(s => 
-      s.callSign.toLowerCase() === searchQuery.trim().toLowerCase()
-    );
+    if (searchType === 'callsign') {
+      const found = stations.find(s => 
+        s.callSign.toLowerCase() === searchQuery.trim().toLowerCase()
+      );
 
-    if (found) {
-      setHighlightedStation(found.callSign);
-      setMapCenter([found.lat, found.lon]);
-      setMapZoom(10);
-    } else {
-      alert(`Station "${searchQuery}" not found`);
+      if (found) {
+        setHighlightedStations([found.callSign]);
+        setMapCenter([found.lat, found.lon]);
+        setMapZoom(10);
+      } else {
+        alert(`Station "${searchQuery}" not found`);
+      }
+    } else if (searchType === 'frequency') {
+      // Search by frequency - round to nearest 10 kHz
+      const inputFreq = parseFloat(searchQuery.trim());
+      
+      if (isNaN(inputFreq)) {
+        alert('Please enter a valid frequency number');
+        return;
+      }
+      
+      // Round to nearest 10 kHz
+      const roundedFreq = Math.round(inputFreq / 10) * 10;
+      
+      // Search for stations with this frequency (format: "XXX   kHz")
+      const foundStations = stations.filter(s => {
+        const stationFreq = parseInt(s.frequency.trim());
+        return stationFreq === roundedFreq;
+      });
+
+      if (foundStations.length > 0) {
+        setHighlightedStations(foundStations.map(s => s.callSign));
+        
+        // Show feedback if we rounded
+        if (inputFreq !== roundedFreq) {
+          console.log(`Rounded ${inputFreq} kHz to ${roundedFreq} kHz`);
+        }
+      } else {
+        alert(`No stations found on frequency ${roundedFreq} kHz`);
+      }
     }
   };
 
   const clearSearch = () => {
     setSearchQuery('');
-    setHighlightedStation(null);
+    setHighlightedStations([]);
   };
 
   // Create custom icons for different power levels
@@ -141,17 +172,25 @@ function App() {
             <LocationInput onLocationChange={handleLocationChange} />
             <div className="station-search-container">
               <form onSubmit={handleStationSearch} className="station-search">
+                <select 
+                  value={searchType} 
+                  onChange={(e) => setSearchType(e.target.value)}
+                  className="search-type-select"
+                >
+                  <option value="callsign">Call Sign</option>
+                  <option value="frequency">Frequency</option>
+                </select>
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search station (e.g., WABC)"
+                  placeholder={searchType === 'callsign' ? 'e.g., WABC' : 'e.g., 540 or 1010'}
                   className="search-input"
                 />
                 <button type="submit" className="btn-primary">
                   Search
                 </button>
-                {highlightedStation && (
+                {highlightedStations.length > 0 && (
                   <button type="button" onClick={clearSearch} className="btn-secondary">
                     Clear
                   </button>
@@ -211,7 +250,7 @@ function App() {
               : null;
 
             const isHighPower = station.power >= 10;
-            const isHighlighted = highlightedStation === station.callSign;
+            const isHighlighted = highlightedStations.includes(station.callSign);
 
             return (
               <Marker
