@@ -32,6 +32,8 @@ function App() {
   const [error, setError] = useState(null);
   const [mapCenter, setMapCenter] = useState([39.8283, -98.5795]); // Center of US [lat, lng]
   const [mapZoom, setMapZoom] = useState(4);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [highlightedStation, setHighlightedStation] = useState(null);
 
   // Load station data on mount
   useEffect(() => {
@@ -69,6 +71,31 @@ function App() {
     }
   };
 
+  const handleStationSearch = (e) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) {
+      setHighlightedStation(null);
+      return;
+    }
+
+    const found = stations.find(s => 
+      s.callSign.toLowerCase() === searchQuery.trim().toLowerCase()
+    );
+
+    if (found) {
+      setHighlightedStation(found.callSign);
+      setMapCenter([found.lat, found.lon]);
+      setMapZoom(10);
+    } else {
+      alert(`Station "${searchQuery}" not found`);
+    }
+  };
+
+  const clearSearch = () => {
+    setSearchQuery('');
+    setHighlightedStation(null);
+  };
+
   // Create custom icons for different power levels
   const createStationIcon = (power) => {
     let color = '#ffcc00'; // Yellow for low power
@@ -83,7 +110,7 @@ function App() {
     });
   };
 
-  // Calculate distance between two points
+  // Calculate distance between two points using Haversine formula
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
     const R = 3959; // Earth's radius in miles
     const dLat = toRad(lat2 - lat1);
@@ -109,7 +136,28 @@ function App() {
           <h1>AM Radio DXing Map</h1>
           <p className="subtitle">Explore AM radio stations across the United States</p>
         </div>
-        <LocationInput onLocationChange={handleLocationChange} />
+        <div className="header-controls">
+          <LocationInput onLocationChange={handleLocationChange} />
+          <div className="station-search-container">
+            <form onSubmit={handleStationSearch} className="station-search">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search station (e.g., WABC)"
+                className="search-input"
+              />
+              <button type="submit" className="btn-primary">
+                Search
+              </button>
+              {highlightedStation && (
+                <button type="button" onClick={clearSearch} className="btn-secondary">
+                  Clear
+                </button>
+              )}
+            </form>
+          </div>
+        </div>
       </header>
 
       <div className="legend">
@@ -148,34 +196,12 @@ function App() {
           center={mapCenter}
           zoom={mapZoom}
           style={{ height: '100%', width: '100%' }}
-          scrollWheelZoom={true}
         >
+          <MapUpdater center={mapCenter} zoom={mapZoom} />
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-          
-          <MapUpdater center={mapCenter} zoom={mapZoom} />
-
-          {/* User location marker */}
-          {userLocation && (
-            <Marker
-              position={[userLocation.lat, userLocation.lng]}
-              icon={L.divIcon({
-                className: 'custom-marker',
-                html: `<div style="width: 20px; height: 20px; border-radius: 50%; background-color: #0066ff; border: 3px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.4);"></div>`,
-                iconSize: [26, 26],
-                iconAnchor: [13, 13],
-              })}
-            >
-              <Popup>
-                <strong>Your Location</strong>
-                <br />
-                {userLocation.formattedAddress}
-              </Popup>
-            </Marker>
-          )}
-
           {/* Station markers */}
           {stations.map((station) => {
             const distance = userLocation
@@ -183,12 +209,43 @@ function App() {
               : null;
 
             const isHighPower = station.power >= 10;
+            const isHighlighted = highlightedStation === station.callSign;
 
             return (
               <Marker
                 key={station.id}
                 position={[station.lat, station.lon]}
-                icon={isHighPower 
+                icon={isHighlighted
+                  ? L.divIcon({
+                      className: 'custom-marker-highlighted',
+                      html: `
+                        <div style="display: flex; flex-direction: column; align-items: center;">
+                          <div style="
+                            width: 20px;
+                            height: 20px;
+                            border-radius: 50%;
+                            background-color: #00ff00;
+                            border: 3px solid #ffff00;
+                            box-shadow: 0 0 10px rgba(255,255,0,0.8);
+                            animation: pulse 1s infinite;
+                          "></div>
+                          <div style="
+                            font-size: 11px;
+                            font-weight: bold;
+                            color: #000;
+                            background: #ffff00;
+                            padding: 2px 6px;
+                            border-radius: 3px;
+                            margin-top: 3px;
+                            white-space: nowrap;
+                            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+                          ">${station.callSign}</div>
+                        </div>
+                      `,
+                      iconSize: [60, 40],
+                      iconAnchor: [30, 10],
+                    })
+                  : isHighPower 
                   ? L.divIcon({
                       className: 'custom-marker-labeled',
                       html: `
@@ -219,7 +276,7 @@ function App() {
                     })
                   : createStationIcon(station.power)
                 }
-                eventHandlers={!isHighPower ? {
+                eventHandlers={!isHighPower && !isHighlighted ? {
                   mouseover: (e) => {
                     e.target.bindTooltip(station.callSign, {
                       permanent: false,
