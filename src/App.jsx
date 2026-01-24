@@ -132,30 +132,32 @@ function App() {
   return (
     <div className="app-container">
       <header className="app-header">
-        <div className="header-content">
-          <h1>AM Radio DXing Map</h1>
-          <p className="subtitle">Explore AM radio stations across the United States</p>
-        </div>
-        <div className="header-controls">
-          <LocationInput onLocationChange={handleLocationChange} />
-          <div className="station-search-container">
-            <form onSubmit={handleStationSearch} className="station-search">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search station (e.g., WABC)"
-                className="search-input"
-              />
-              <button type="submit" className="btn-primary">
-                Search
-              </button>
-              {highlightedStation && (
-                <button type="button" onClick={clearSearch} className="btn-secondary">
-                  Clear
+        <div className="header-layout">
+          <div className="header-content">
+            <h1>AM Radio DXing Map</h1>
+            <p className="subtitle">Explore AM radio stations across the United States</p>
+          </div>
+          <div className="header-controls">
+            <LocationInput onLocationChange={handleLocationChange} />
+            <div className="station-search-container">
+              <form onSubmit={handleStationSearch} className="station-search">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search station (e.g., WABC)"
+                  className="search-input"
+                />
+                <button type="submit" className="btn-primary">
+                  Search
                 </button>
-              )}
-            </form>
+                {highlightedStation && (
+                  <button type="button" onClick={clearSearch} className="btn-secondary">
+                    Clear
+                  </button>
+                )}
+              </form>
+            </div>
           </div>
         </div>
       </header>

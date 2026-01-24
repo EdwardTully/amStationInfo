@@ -23,28 +23,35 @@ body {
 .app-header {
   background: linear-gradient(135deg, #202122 0%, #764ba2 100%);
   color: white;
-  padding: 20px 30px;
+  padding: 12px 30px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   z-index: 10;
 }
 
+.header-layout {
+  display: flex;
+  gap: 30px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
 .header-content {
-  margin-bottom: 15px;
+  flex-shrink: 0;
 }
 
 .header-controls {
   display: flex;
   gap: 20px;
   flex-wrap: wrap;
-  align-items: flex-start;
+  align-items: center;
 }
 
 .location-input-container {
-  margin-top: 10px;
+  margin: 0;
 }
 
 .station-search-container {
-  margin-top: 10px;
+  margin: 0;
 }
 
 .station-search {
@@ -69,14 +76,15 @@ body {
 }
 
 .app-header h1 {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 700;
-  margin-bottom: 5px;
+  margin-bottom: 2px;
 }
 
 .subtitle {
-  font-size: 14px;
+  font-size: 13px;
   opacity: 0.9;
+  margin: 0;
 }
 
 .location-form {
