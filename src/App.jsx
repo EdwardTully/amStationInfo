@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import L from 'leaflet';
@@ -194,6 +194,18 @@ function App() {
 
   const toRad = (degrees) => degrees * (Math.PI / 180);
 
+  // Memoize valid stations to prevent unnecessary re-renders
+  const validStations = useMemo(() => {
+    return stations.filter(station => 
+      station && 
+      station.lat && 
+      station.lon && 
+      station.callSign &&
+      !isNaN(station.lat) &&
+      !isNaN(station.lon)
+    );
+  }, [stations]);
+
   return (
     <div className="app-container">
       <header className="app-header">
@@ -251,7 +263,7 @@ function App() {
             <span>Low (&lt; 1 kW)</span>
           </div>
         </div>
-        <p className="station-count">{stations.length} stations loaded</p>
+        <p className="station-count">{validStations.length} stations loaded</p>
       </div>
 
       {loading && (
@@ -278,17 +290,15 @@ function App() {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
           {/* Station markers */}
-          {!loading && stations && stations.length > 0 && (
+          {!loading && validStations.length > 0 && (
           <MarkerClusterGroup
-            key={`cluster-${stations.length}`}
+            key={`cluster-${validStations.length}`}
             chunkedLoading
             maxClusterRadius={80}
             spiderfyOnMaxZoom={true}
             showCoverageOnHover={false}
           >
-            {stations
-              .filter(station => station && station.lat && station.lon && station.callSign)
-              .map((station, index) => {
+            {validStations.map((station, index) => {
             const distance = userLocation
               ? calculateDistance(userLocation.lat, userLocation.lng, station.lat, station.lon)
               : null;
