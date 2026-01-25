@@ -55,14 +55,14 @@ function App() {
       console.log('US Response status:', usResponse.status);
       const usText = await usResponse.text();
       console.log('US Data length:', usText.length);
-      const usStations = parseStationData(usText);
+      const usStations = parseStationData(usText) || [];
       console.log('US Parsed stations:', usStations.length);
       
       // Load Canadian stations
       const caResponse = await fetch('/canadianStations.csv');
       console.log('CA Response status:', caResponse.status);
       const caText = await caResponse.text();
-      const caStations = parseCanadianStationData(caText);
+      const caStations = parseCanadianStationData(caText) || [];
       console.log('Canadian Parsed stations:', caStations.length);
       
       // Combine both datasets
