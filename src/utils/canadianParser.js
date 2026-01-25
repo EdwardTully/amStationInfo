@@ -5,8 +5,7 @@
 
 export function parseCanadianStationData(csvContent) {
   const lines = csvContent.trim().split('\n');
-  const stations = [];
-  const seen = new Set();
+  const stationMap = new Map(); // Use Map to keep highest power version
 
   // Skip header row
   for (let i = 1; i < lines.length; i++) {
@@ -14,48 +13,59 @@ export function parseCanadianStationData(csvContent) {
     if (!line.trim()) continue;
 
     try {
-      // Parse CSV - handle quoted fields
-      const matches = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
-      if (!matches || matches.length < 8) continue;
-
-      const callSign = matches[5].replace(/"/g, '').trim();
-      const frequencyMHz = parseFloat(matches[1].replace(/"/g, ''));
+      // Simple CSV split - assumes proper CSV format
+      const columns = line.split(',').map(col => col.replace(/"/g, '').trim());
+      
+      // Skip header rows
+      if (columns[0] === 'Channel Type' || columns[0] === 'TX_RES' && columns[3] === 'Call sign') continue;
+      
+      // New format: Channel Type, Frequency, Power, Call sign, Lat, Lon, Licensee
+      if (columns.length < 7) {
+        continue;
+      }
+      
+      const frequencyMHz = parseFloat(columns[1]);
+      const powerW = parseFloat(columns[2]);
+      const callSign = columns[3];
+      const lat = parseFloat(columns[4]);
+      const lon = parseFloat(columns[5]);
+      const licensee = columns[6] || 'Canadian Broadcaster';
+      
       const frequency = `${Math.round(frequencyMHz * 1000)}   kHz`; // Convert MHz to kHz
-      const powerW = parseFloat(matches[3].replace(/"/g, ''));
       const power = powerW / 1000; // Convert Watts to kW
-      const location = matches[4].replace(/"/g, '').trim();
-      const lat = parseFloat(matches[6].replace(/"/g, ''));
-      const lon = parseFloat(matches[7].replace(/"/g, ''));
 
-      // Validate coordinates
-      if (isNaN(lat) || isNaN(lon) || isNaN(power)) {
+      // Validate coordinates and data (skip 0,0 coordinates)
+      if (isNaN(lat) || isNaN(lon) || isNaN(power) || !callSign || (lat === 0 && lon === 0)) {
         continue;
       }
 
-      // Deduplicate by call sign and frequency
-      const uniqueKey = `${callSign}-${frequency}`;
-      if (seen.has(uniqueKey)) continue;
-      seen.add(uniqueKey);
+      // Use base call sign (remove -AX1, -AX2 suffixes)
+      const baseCallSign = callSign.split('-')[0];
+      const uniqueKey = `${baseCallSign}-${frequency}`;
 
-      const station = {
-        callSign,
-        frequency,
-        power,
-        city: location,
-        state: 'CA', // Canadian provinces could be parsed if needed
-        lat,
-        lon,
-        operator: 'Canadian Broadcaster', // Could enhance if data available
-        id: uniqueKey,
-      };
-
-      stations.push(station);
+      // Keep the entry with highest power for each unique station
+      const existing = stationMap.get(uniqueKey);
+      if (!existing || power > existing.power) {
+        const station = {
+          callSign: baseCallSign,
+          frequency,
+          power,
+          city: 'Canada', // Location not in new format
+          state: 'CA',
+          lat,
+          lon,
+          operator: licensee,
+          id: uniqueKey,
+        };
+        stationMap.set(uniqueKey, station);
+      }
     } catch (error) {
       // Skip parsing errors
-      console.warn('Error parsing Canadian station line:', error);
     }
   }
 
+  // Convert Map to array
+  const stations = Array.from(stationMap.values());
   console.log('Canadian stations parsed:', stations.length);
   return stations;
 }
