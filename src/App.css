@@ -26,6 +26,7 @@ body {
   padding: 20px 40px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   z-index: 10;
+  flex-shrink: 0;
 }
 
 .header-layout {
@@ -342,39 +343,145 @@ body {
 /* Responsive design */
 @media (max-width: 768px) {
   .app-header {
-    padding: 15px 20px;
+    padding: 12px 16px;
   }
 
   .app-header h1 {
-    font-size: 22px;
+    font-size: 18px;
+    margin-bottom: 2px;
   }
 
-  .legend {
-    padding: 12px 20px;
-    gap: 15px;
+  .subtitle {
+    font-size: 12px;
   }
 
-  .legend h3 {
-    font-size: 14px;
-  }
-
-  .legend-items {
+  .header-layout {
     gap: 12px;
   }
 
-  .station-count {
-    margin-left: 0;
+  .header-controls {
+    gap: 12px;
     width: 100%;
   }
 
-  .zip-input {
-    min-width: 150px;
+  .location-input-container,
+  .station-search-container {
+    width: 100%;
+  }
+
+  .location-form {
+    gap: 8px;
+    width: 100%;
+  }
+
+  .station-search {
+    gap: 8px;
+    width: 100%;
+  }
+
+  .zip-input,
+  .search-input {
+    min-width: unset;
+    width: 100%;
+    padding: 8px 10px;
     font-size: 14px;
+  }
+
+  .search-type-select {
+    padding: 8px 10px;
+    font-size: 14px;
+    width: 100%;
   }
 
   .btn-primary,
   .btn-secondary {
     font-size: 14px;
-    padding: 8px 16px;
+    padding: 8px 14px;
+    height: 38px;
+    flex: 1;
+    min-width: 80px;
+  }
+
+  .legend {
+    bottom: 10px;
+    left: 10px;
+    padding: 10px;
+    max-width: calc(100vw - 20px);
+  }
+
+  .legend h3 {
+    font-size: 11px;
+    margin-bottom: 8px;
+  }
+
+  .legend-items {
+    gap: 6px;
+  }
+
+  .legend-item {
+    font-size: 11px;
+  }
+
+  .legend-marker {
+    width: 12px;
+    height: 12px;
+  }
+
+  .station-count {
+    margin-top: 8px;
+    padding-top: 8px;
+    font-size: 11px;
+  }
+
+  .error-message {
+    font-size: 12px;
+    padding: 6px 10px;
+    margin-top: 6px;
+  }
+}
+
+/* Extra small devices (phones in portrait mode) */
+@media (max-width: 480px) {
+  .app-header {\n    padding: 10px 12px;\n  }
+
+  .app-header h1 {
+    font-size: 16px;
+  }
+
+  .subtitle {
+    font-size: 11px;
+  }
+
+  .header-layout {
+    gap: 10px;
+  }
+
+  .header-controls {
+    gap: 10px;
+  }
+
+  .location-form,
+  .station-search {
+    gap: 6px;
+  }
+
+  .zip-input,
+  .search-input,
+  .search-type-select {
+    padding: 7px 8px;
+    font-size: 13px;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    font-size: 13px;
+    padding: 7px 12px;
+    height: 34px;
+  }
+
+  .legend {
+    bottom: 8px;
+    left: 8px;
+    padding: 8px;
   }
 }
