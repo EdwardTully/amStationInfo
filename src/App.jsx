@@ -286,8 +286,9 @@ function App() {
             spiderfyOnMaxZoom={true}
             showCoverageOnHover={false}
           >
-            {stations.map((station, index) => {
-            if (!station || !station.lat || !station.lon) return null;
+            {stations
+              .filter(station => station && station.lat && station.lon && station.callSign)
+              .map((station, index) => {
             const distance = userLocation
               ? calculateDistance(userLocation.lat, userLocation.lng, station.lat, station.lon)
               : null;
