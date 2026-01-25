@@ -444,7 +444,9 @@ body {
 
 /* Extra small devices (phones in portrait mode) */
 @media (max-width: 480px) {
-  .app-header {\n    padding: 10px 12px;\n  }
+  .app-header {
+    padding: 10px 12px;
+  }
 
   .app-header h1 {
     font-size: 16px;
