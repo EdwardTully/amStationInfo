@@ -114,7 +114,7 @@ function App() {
 
     if (searchType === 'callsign') {
       const found = stations.find(s => 
-        s.callSign.toLowerCase() === searchQuery.trim().toLowerCase()
+        s && s.callSign && s.callSign.toLowerCase() === searchQuery.trim().toLowerCase()
       );
 
       if (found) {
@@ -138,8 +138,9 @@ function App() {
       
       // Search for stations with this frequency (format: "XXX   kHz")
       const foundStations = stations.filter(s => {
+        if (!s || !s.frequency) return false;
         const stationFreq = parseInt(s.frequency.trim());
-        return stationFreq === roundedFreq;
+        return !isNaN(stationFreq) && stationFreq === roundedFreq;
       });
 
       if (foundStations.length > 0) {
