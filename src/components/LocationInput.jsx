@@ -64,7 +64,7 @@ export function LocationInput({ onLocationChange }) {
           type="text"
           value={zipCode}
           onChange={(e) => setZipCode(e.target.value)}
-          placeholder="Enter your zip code"
+          placeholder="Zip code (optional - for distance calc)"
           maxLength="5"
           className="zip-input"
           disabled={loading}
