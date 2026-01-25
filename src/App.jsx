@@ -42,42 +42,57 @@ function App() {
 
   // Load station data on mount
   useEffect(() => {
-    loadStationData();
+    let isMounted = true;
+    
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        console.log('Fetching station data...');
+        
+        // Load US stations
+        const usResponse = await fetch('/amRadioSta.txt');
+        console.log('US Response status:', usResponse.status);
+        const usText = await usResponse.text();
+        console.log('US Data length:', usText.length);
+        const usStations = parseStationData(usText) || [];
+        console.log('US Parsed stations:', usStations.length);
+        
+        // Load Canadian stations
+        const caResponse = await fetch('/canadianStations.csv');
+        console.log('CA Response status:', caResponse.status);
+        const caText = await caResponse.text();
+        const caStations = parseCanadianStationData(caText) || [];
+        console.log('Canadian Parsed stations:', caStations.length);
+        
+        // Combine both datasets
+        const allStations = [...usStations, ...caStations];
+        console.log('Total stations:', allStations.length);
+        
+        // Only update state if component is still mounted
+        if (isMounted) {
+          setStations(allStations);
+          setError(null);
+        }
+      } catch (err) {
+        console.error('Error loading station data:', err);
+        if (isMounted) {
+          setError('Failed to load station data. Please refresh the page.');
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+    
+    loadData();
+    
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  const loadStationData = async () => {
-    try {
-      setLoading(true);
-      console.log('Fetching station data...');
-      
-      // Load US stations
-      const usResponse = await fetch('/amRadioSta.txt');
-      console.log('US Response status:', usResponse.status);
-      const usText = await usResponse.text();
-      console.log('US Data length:', usText.length);
-      const usStations = parseStationData(usText) || [];
-      console.log('US Parsed stations:', usStations.length);
-      
-      // Load Canadian stations
-      const caResponse = await fetch('/canadianStations.csv');
-      console.log('CA Response status:', caResponse.status);
-      const caText = await caResponse.text();
-      const caStations = parseCanadianStationData(caText) || [];
-      console.log('Canadian Parsed stations:', caStations.length);
-      
-      // Combine both datasets
-      const allStations = [...usStations, ...caStations];
-      console.log('Total stations:', allStations.length);
-      
-      setStations(allStations);
-      setError(null);
-    } catch (err) {
-      console.error('Error loading station data:', err);
-      setError('Failed to load station data. Please refresh the page.');
-    } finally {
-      setLoading(false);
-    }
-  };
+
 
   const handleLocationChange = (location) => {
     setUserLocation(location);
@@ -264,6 +279,7 @@ function App() {
           {/* Station markers */}
           {!loading && stations && stations.length > 0 && (
           <MarkerClusterGroup
+            key={`cluster-${stations.length}`}
             chunkedLoading
             maxClusterRadius={80}
             spiderfyOnMaxZoom={true}
