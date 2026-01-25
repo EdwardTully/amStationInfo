@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from 'react-leaflet';
+import MarkerClusterGroup from 'react-leaflet-cluster';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import 'leaflet.markercluster/dist/MarkerCluster.css';
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import { LocationInput } from './components/LocationInput';
 import { parseStationData } from './utils/stationParser';
 import { parseCanadianStationData } from './utils/canadianParser';
@@ -259,7 +262,13 @@ function App() {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
           {/* Station markers */}
-          {stations.map((station) => {
+          <MarkerClusterGroup
+            chunkedLoading
+            maxClusterRadius={50}
+            spiderfyOnMaxZoom={true}
+            showCoverageOnHover={false}
+          >
+            {stations.map((station) => {
             const distance = userLocation
               ? calculateDistance(userLocation.lat, userLocation.lng, station.lat, station.lon)
               : null;
@@ -374,6 +383,7 @@ function App() {
               </Marker>
             );
           })}
+          </MarkerClusterGroup>
         </MapContainer>
       </div>
 
