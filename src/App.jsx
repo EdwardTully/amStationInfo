@@ -262,14 +262,15 @@ function App() {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
           {/* Station markers */}
-          {stations && stations.length > 0 && (
+          {!loading && stations && stations.length > 0 && (
           <MarkerClusterGroup
             chunkedLoading
             maxClusterRadius={80}
             spiderfyOnMaxZoom={true}
             showCoverageOnHover={false}
           >
-            {stations.map((station) => {
+            {stations.map((station, index) => {
+            if (!station || !station.lat || !station.lon) return null;
             const distance = userLocation
               ? calculateDistance(userLocation.lat, userLocation.lng, station.lat, station.lon)
               : null;
@@ -279,7 +280,7 @@ function App() {
 
             return (
               <Marker
-                key={station.id}
+                key={station.id || `station-${index}`}
                 position={[station.lat, station.lon]}
                 icon={isHighlighted
                   ? L.divIcon({
