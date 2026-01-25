@@ -370,19 +370,21 @@ body {
   }
 
   .location-form {
-    gap: 8px;
+    gap: 6px;
     width: 100%;
+    flex-wrap: nowrap;
   }
 
   .station-search {
-    gap: 8px;
+    gap: 6px;
     width: 100%;
+    flex-wrap: nowrap;
   }
 
   .zip-input,
   .search-input {
     min-width: unset;
-    width: 100%;
+    flex: 1;
     padding: 8px 10px;
     font-size: 14px;
   }
@@ -390,16 +392,16 @@ body {
   .search-type-select {
     padding: 8px 10px;
     font-size: 14px;
-    width: 100%;
+    flex: 1;
   }
 
   .btn-primary,
   .btn-secondary {
     font-size: 14px;
-    padding: 8px 14px;
+    padding: 8px 12px;
     height: 38px;
-    flex: 1;
-    min-width: 80px;
+    flex-shrink: 0;
+    white-space: nowrap;
   }
 
   .legend {
@@ -462,7 +464,8 @@ body {
 
   .location-form,
   .station-search {
-    gap: 6px;
+    gap: 4px;
+    flex-wrap: nowrap;
   }
 
   .zip-input,
@@ -474,8 +477,8 @@ body {
 
   .btn-primary,
   .btn-secondary {
-    font-size: 13px;
-    padding: 7px 12px;
+    font-size: 12px;
+    padding: 7px 10px;
     height: 34px;
   }
 
