@@ -42,7 +42,7 @@ function MarkerClusterLayer({ stations, userLocation, highlightedStations, calcu
       maxClusterRadius: 80,
       spiderfyOnMaxZoom: true,
       showCoverageOnHover: false,
-      disableClusteringAtZoom: 11, // Stop clustering at city zoom level
+      disableClusteringAtZoom: 9, // Stop clustering at metro area level
       iconCreateFunction: function(cluster) {
         const markers = cluster.getAllChildMarkers();
         const count = markers.length;
