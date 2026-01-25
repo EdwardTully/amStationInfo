@@ -181,7 +181,7 @@ function App() {
         <div className="header-layout">
           <div className="header-content">
             <h1>AM Radio DXing Map</h1>
-            <p className="subtitle">Explore AM radio stations across the United States</p>
+            <p className="subtitle">Explore AM radio stations across North America</p>
           </div>
           <div className="header-controls">
             <LocationInput onLocationChange={handleLocationChange} />
