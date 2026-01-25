@@ -36,13 +36,69 @@ function MarkerClusterLayer({ stations, userLocation, highlightedStations, calcu
   useEffect(() => {
     if (!stations || stations.length === 0) return;
 
-    // Create marker cluster group
+    // Create marker cluster group with custom icon function
     const markerClusterGroup = L.markerClusterGroup({
       chunkedLoading: true,
       maxClusterRadius: 80,
       spiderfyOnMaxZoom: true,
       showCoverageOnHover: false,
       disableClusteringAtZoom: 11, // Stop clustering at city zoom level
+      iconCreateFunction: function(cluster) {
+        const markers = cluster.getAllChildMarkers();
+        const count = markers.length;
+        
+        // Check if any marker in this cluster is highlighted
+        const hasHighlighted = markers.some(marker => {
+          const station = marker.options.stationData;
+          return station && highlightedStations.includes(station.callSign);
+        });
+        
+        // Style cluster based on whether it contains highlighted stations
+        let clusterClass = 'marker-cluster-';
+        let backgroundColor = '';
+        let borderColor = '';
+        
+        if (hasHighlighted) {
+          // Highlighted cluster - yellow/gold
+          backgroundColor = '#ffff00';
+          borderColor = '#ff9900';
+          clusterClass += 'highlighted';
+        } else if (count < 10) {
+          clusterClass += 'small';
+          backgroundColor = '#b5e28c';
+          borderColor = '#6fa352';
+        } else if (count < 100) {
+          clusterClass += 'medium';
+          backgroundColor = '#f1d357';
+          borderColor = '#d4a137';
+        } else {
+          clusterClass += 'large';
+          backgroundColor = '#fd9c73';
+          borderColor = '#d4622a';
+        }
+        
+        const size = hasHighlighted ? 50 : 40;
+        
+        return L.divIcon({
+          html: `<div style="
+            background-color: ${backgroundColor};
+            border: 3px solid ${borderColor};
+            border-radius: 50%;
+            width: ${size}px;
+            height: ${size}px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: ${hasHighlighted ? '16px' : '14px'};
+            color: #000;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            ${hasHighlighted ? 'animation: pulse 2s infinite;' : ''}
+          ">${count}</div>`,
+          className: clusterClass,
+          iconSize: L.point(size, size)
+        });
+      }
     });
 
     // Add markers to cluster group
@@ -118,7 +174,10 @@ function MarkerClusterLayer({ stations, userLocation, highlightedStations, calcu
         icon = createStationIcon(station.power);
       }
 
-      const marker = L.marker([station.lat, station.lon], { icon });
+      const marker = L.marker([station.lat, station.lon], { 
+        icon,
+        stationData: station // Store station data for cluster detection
+      });
 
       // Add tooltip for non-high-power, non-highlighted stations
       if (!isHighPower && !isHighlighted) {
