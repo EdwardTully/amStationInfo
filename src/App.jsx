@@ -264,7 +264,7 @@ function App() {
           {/* Station markers */}
           <MarkerClusterGroup
             chunkedLoading
-            maxClusterRadius={50}
+            maxClusterRadius={80}
             spiderfyOnMaxZoom={true}
             showCoverageOnHover={false}
           >
