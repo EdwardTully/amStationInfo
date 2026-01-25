@@ -184,7 +184,7 @@ body {
 }
 
 .legend {
-  background-color: #f8fafc;
+  background-color: transparent;
   padding: 16px 40px;
   border-bottom: 1px solid #e2e8f0;
   display: flex;
