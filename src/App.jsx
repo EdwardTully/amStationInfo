@@ -262,6 +262,7 @@ function App() {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
           {/* Station markers */}
+          {stations && stations.length > 0 && (
           <MarkerClusterGroup
             chunkedLoading
             maxClusterRadius={80}
@@ -384,6 +385,7 @@ function App() {
             );
           })}
           </MarkerClusterGroup>
+          )}
         </MapContainer>
       </div>
 
