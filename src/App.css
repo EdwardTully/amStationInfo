@@ -184,8 +184,8 @@ body {
 }
 
 .legend {
-  background: none;
-  padding: 16px 40px;
+  background-color: none;
+  padding: 16px 30px;
   display: flex;
   align-items: center;
   gap: 30px;
