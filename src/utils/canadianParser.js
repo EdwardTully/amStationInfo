@@ -16,8 +16,8 @@ export function parseCanadianStationData(csvContent) {
       // Simple CSV split - assumes proper CSV format
       const columns = line.split(',').map(col => col.replace(/"/g, '').trim());
       
-      // Skip header rows
-      if (columns[0] === 'Channel Type' || columns[0] === 'TX_RES' && columns[3] === 'Call sign') continue;
+      // Skip header row only (not data rows)
+      if (columns[3] === 'Call sign') continue;
       
       // New format: Channel Type, Frequency, Power, Call sign, Lat, Lon, Licensee
       if (columns.length < 7) {
