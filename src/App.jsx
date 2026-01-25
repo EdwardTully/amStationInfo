@@ -2,6 +2,9 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import 'leaflet.markercluster/dist/MarkerCluster.css';
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
+import 'leaflet.markercluster';
 import { LocationInput } from './components/LocationInput';
 import { parseStationData } from './utils/stationParser';
 import { parseCanadianStationData } from './utils/canadianParser';
@@ -23,6 +26,155 @@ function MapUpdater({ center, zoom }) {
       map.setView(center, zoom);
     }
   }, [center, zoom, map]);
+  return null;
+}
+
+// Component to handle marker clustering with native Leaflet
+function MarkerClusterLayer({ stations, userLocation, highlightedStations, calculateDistance, createStationIcon }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!stations || stations.length === 0) return;
+
+    // Create marker cluster group
+    const markerClusterGroup = L.markerClusterGroup({
+      chunkedLoading: true,
+      maxClusterRadius: 80,
+      spiderfyOnMaxZoom: true,
+      showCoverageOnHover: false,
+      disableClusteringAtZoom: 11, // Stop clustering at city zoom level
+    });
+
+    // Add markers to cluster group
+    stations.forEach((station, index) => {
+      const distance = userLocation
+        ? calculateDistance(userLocation.lat, userLocation.lng, station.lat, station.lon)
+        : null;
+
+      const isHighPower = station.power >= 10;
+      const isHighlighted = highlightedStations.includes(station.callSign);
+
+      let icon;
+      if (isHighlighted) {
+        icon = L.divIcon({
+          className: 'custom-marker-highlighted',
+          html: `
+            <div style="display: flex; flex-direction: column; align-items: center;">
+              <div style="
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                background-color: #00ff00;
+                border: 3px solid #ffff00;
+                box-shadow: 0 0 10px rgba(255,255,0,0.8);
+                animation: pulse 1s infinite;
+              "></div>
+              <div style="
+                font-size: 11px;
+                font-weight: bold;
+                color: #000;
+                background: #ffff00;
+                padding: 2px 6px;
+                border-radius: 3px;
+                margin-top: 3px;
+                white-space: nowrap;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+              ">${station.callSign}</div>
+            </div>
+          `,
+          iconSize: [60, 40],
+          iconAnchor: [30, 10],
+        });
+      } else if (isHighPower) {
+        icon = L.divIcon({
+          className: 'custom-marker-labeled',
+          html: `
+            <div style="display: flex; flex-direction: column; align-items: center;">
+              <div style="
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                background-color: #ff0000;
+                border: 2px solid white;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+              "></div>
+              <div style="
+                font-size: 9px;
+                font-weight: bold;
+                color: #333;
+                background: rgba(255,255,255,0.9);
+                padding: 1px 3px;
+                border-radius: 2px;
+                margin-top: 2px;
+                white-space: nowrap;
+                box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+              ">${station.callSign}</div>
+            </div>
+          `,
+          iconSize: [50, 30],
+          iconAnchor: [25, 6],
+        });
+      } else {
+        icon = createStationIcon(station.power);
+      }
+
+      const marker = L.marker([station.lat, station.lon], { icon });
+
+      // Add tooltip for non-high-power, non-highlighted stations
+      if (!isHighPower && !isHighlighted) {
+        marker.on('mouseover', function() {
+          this.bindTooltip(station.callSign, {
+            permanent: false,
+            direction: 'top',
+            className: 'station-tooltip'
+          }).openTooltip();
+        });
+        marker.on('mouseout', function() {
+          this.closeTooltip();
+        });
+      }
+
+      // Create popup content
+      const popupContent = `
+        <div style="min-width: 200px;">
+          <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: bold;">
+            ${station.callSign}
+          </h3>
+          <p style="margin: 4px 0; font-size: 14px;">
+            <strong>Frequency:</strong> ${station.frequency}
+          </p>
+          <p style="margin: 4px 0; font-size: 14px;">
+            <strong>Power:</strong> ${station.power} kW
+          </p>
+          <p style="margin: 4px 0; font-size: 14px;">
+            <strong>Location:</strong> ${station.city}, ${station.state}
+          </p>
+          ${station.operator ? `
+            <p style="margin: 4px 0; font-size: 14px;">
+              <strong>Operator:</strong> ${station.operator}
+            </p>
+          ` : ''}
+          ${distance !== null ? `
+            <p style="margin: 4px 0; font-size: 14px; color: #0066cc;">
+              <strong>Distance:</strong> ${distance.toFixed(1)} miles
+            </p>
+          ` : ''}
+        </div>
+      `;
+
+      marker.bindPopup(popupContent);
+      markerClusterGroup.addLayer(marker);
+    });
+
+    // Add cluster group to map
+    map.addLayer(markerClusterGroup);
+
+    // Cleanup function
+    return () => {
+      map.removeLayer(markerClusterGroup);
+    };
+  }, [map, stations, userLocation, highlightedStations, calculateDistance, createStationIcon]);
+
   return null;
 }
 
@@ -286,122 +438,16 @@ function App() {
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-          {/* Station markers */}
-          {!loading && validStations.length > 0 && validStations.map((station, index) => {
-            const distance = userLocation
-              ? calculateDistance(userLocation.lat, userLocation.lng, station.lat, station.lon)
-              : null;
-
-            const isHighPower = station.power >= 10;
-            const isHighlighted = highlightedStations.includes(station.callSign);
-
-            return (
-              <Marker
-                key={station.id || `station-${index}`}
-                position={[station.lat, station.lon]}
-                icon={isHighlighted
-                  ? L.divIcon({
-                      className: 'custom-marker-highlighted',
-                      html: `
-                        <div style="display: flex; flex-direction: column; align-items: center;">
-                          <div style="
-                            width: 20px;
-                            height: 20px;
-                            border-radius: 50%;
-                            background-color: #00ff00;
-                            border: 3px solid #ffff00;
-                            box-shadow: 0 0 10px rgba(255,255,0,0.8);
-                            animation: pulse 1s infinite;
-                          "></div>
-                          <div style="
-                            font-size: 11px;
-                            font-weight: bold;
-                            color: #000;
-                            background: #ffff00;
-                            padding: 2px 6px;
-                            border-radius: 3px;
-                            margin-top: 3px;
-                            white-space: nowrap;
-                            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-                          ">${station.callSign}</div>
-                        </div>
-                      `,
-                      iconSize: [60, 40],
-                      iconAnchor: [30, 10],
-                    })
-                  : isHighPower 
-                  ? L.divIcon({
-                      className: 'custom-marker-labeled',
-                      html: `
-                        <div style="display: flex; flex-direction: column; align-items: center;">
-                          <div style="
-                            width: 12px;
-                            height: 12px;
-                            border-radius: 50%;
-                            background-color: #ff0000;
-                            border: 2px solid white;
-                            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-                          "></div>
-                          <div style="
-                            font-size: 9px;
-                            font-weight: bold;
-                            color: #333;
-                            background: rgba(255,255,255,0.9);
-                            padding: 1px 3px;
-                            border-radius: 2px;
-                            margin-top: 2px;
-                            white-space: nowrap;
-                            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-                          ">${station.callSign}</div>
-                        </div>
-                      `,
-                      iconSize: [50, 30],
-                      iconAnchor: [25, 6],
-                    })
-                  : createStationIcon(station.power)
-                }
-                eventHandlers={!isHighPower && !isHighlighted ? {
-                  mouseover: (e) => {
-                    e.target.bindTooltip(station.callSign, {
-                      permanent: false,
-                      direction: 'top',
-                      className: 'station-tooltip'
-                    }).openTooltip();
-                  },
-                  mouseout: (e) => {
-                    e.target.closeTooltip();
-                  }
-                } : {}}
-              >
-                <Popup>
-                  <div style={{ minWidth: '200px' }}>
-                    <h3 style={{ margin: '0 0 8px 0', fontSize: '16px', fontWeight: 'bold' }}>
-                      {station.callSign}
-                    </h3>
-                    <p style={{ margin: '4px 0', fontSize: '14px' }}>
-                      <strong>Frequency:</strong> {station.frequency}
-                    </p>
-                    <p style={{ margin: '4px 0', fontSize: '14px' }}>
-                      <strong>Power:</strong> {station.power} kW
-                    </p>
-                    <p style={{ margin: '4px 0', fontSize: '14px' }}>
-                      <strong>Location:</strong> {station.city}, {station.state}
-                    </p>
-                    {station.operator && (
-                      <p style={{ margin: '4px 0', fontSize: '14px' }}>
-                        <strong>Operator:</strong> {station.operator}
-                      </p>
-                    )}
-                    {distance !== null && (
-                      <p style={{ margin: '4px 0', fontSize: '14px', color: '#0066cc' }}>
-                        <strong>Distance:</strong> {distance.toFixed(1)} miles
-                      </p>
-                    )}
-                  </div>
-                </Popup>
-              </Marker>
-            );
-          })}
+          {/* Station markers with clustering */}
+          {!loading && validStations.length > 0 && (
+            <MarkerClusterLayer
+              stations={validStations}
+              userLocation={userLocation}
+              highlightedStations={highlightedStations}
+              calculateDistance={calculateDistance}
+              createStationIcon={createStationIcon}
+            />
+          )}
         </MapContainer>
       </div>
 
