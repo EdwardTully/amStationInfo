@@ -268,8 +268,8 @@ function App() {
 
       <div className="map-container">
         <MapContainer
-          center={mapCenter}
-          zoom={mapZoom}
+          center={[39.8283, -98.5795]}
+          zoom={4.5}
           style={{ height: '100%', width: '100%' }}
         >
           <MapUpdater center={mapCenter} zoom={mapZoom} />
