@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Background circle -->
+  <circle cx="50" cy="50" r="50" fill="#1e293b"/>
+  
+  <!-- Radio tower -->
+  <rect x="47" y="35" width="6" height="30" fill="#3b82f6"/>
+  <polygon points="50,30 45,35 55,35" fill="#3b82f6"/>
+  
+  <!-- Radio waves (left side) -->
+  <path d="M 35 50 Q 35 42, 42 42" stroke="#fbbf24" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M 30 50 Q 30 37, 42 37" stroke="#fbbf24" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M 25 50 Q 25 32, 42 32" stroke="#fbbf24" stroke-width="3" fill="none" stroke-linecap="round"/>
+  
+  <!-- Radio waves (right side) -->
+  <path d="M 65 50 Q 65 42, 58 42" stroke="#fbbf24" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M 70 50 Q 70 37, 58 37" stroke="#fbbf24" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M 75 50 Q 75 32, 58 32" stroke="#fbbf24" stroke-width="3" fill="none" stroke-linecap="round"/>
+  
+  <!-- Base -->
+  <rect x="42" y="65" width="16" height="4" fill="#3b82f6"/>
+</svg>
