@@ -62,21 +62,40 @@ body {
   align-items: center;
 }
 
-.search-type-select {
-  padding: 10px 12px;
-  font-size: 16px;
-  border: 2px solid white;
-  border-radius: 6px;
+.search-type-toggle {
+  display: flex;
+  gap: 12px;
+  align-items: center;
   background: white;
-  color: #333;
-  outline: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 2px solid white;
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   cursor: pointer;
+  color: #333;
+  font-size: 15px;
+  font-weight: 500;
   transition: all 0.2s;
 }
 
-.search-type-select:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+.radio-label:hover {
+  color: #3b82f6;
+}
+
+.radio-label input[type="radio"] {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+  accent-color: #3b82f6;
+}
+
+.radio-label span {
+  user-select: none;
 }
 
 .search-input {

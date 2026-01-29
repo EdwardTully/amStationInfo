@@ -426,14 +426,28 @@ function App() {
             <LocationInput onLocationChange={handleLocationChange} />
             <div className="station-search-container">
               <form onSubmit={handleStationSearch} className="station-search">
-                <select 
-                  value={searchType} 
-                  onChange={(e) => setSearchType(e.target.value)}
-                  className="search-type-select"
-                >
-                  <option value="callsign">Call Sign</option>
-                  <option value="frequency">Frequency</option>
-                </select>
+                <div className="search-type-toggle">
+                  <label className="radio-label">
+                    <input
+                      type="radio"
+                      name="searchType"
+                      value="callsign"
+                      checked={searchType === 'callsign'}
+                      onChange={(e) => setSearchType(e.target.value)}
+                    />
+                    <span>Call Sign</span>
+                  </label>
+                  <label className="radio-label">
+                    <input
+                      type="radio"
+                      name="searchType"
+                      value="frequency"
+                      checked={searchType === 'frequency'}
+                      onChange={(e) => setSearchType(e.target.value)}
+                    />
+                    <span>Frequency</span>
+                  </label>
+                </div>
                 <input
                   type="text"
                   value={searchQuery}
